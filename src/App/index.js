@@ -19,7 +19,7 @@ class App extends Component {
 
     handleSubmit(e){
         e.preventDefault()
-        this.agregarTarea(this.state.idSeleccionado)
+        if(this.state.texto !== '')this.agregarTarea(this.state.idSeleccionado)
     }
 
 
@@ -63,6 +63,14 @@ class App extends Component {
     render() {
         return(
             <div>
+                <h1>TODO-list App</h1>
+                <h5>{
+                    this.state.tareas.length === 0 ?
+                        'No hay tareas pendientes' :
+                        (this.state.tareas.length === 1 ?
+                            'Hay una tarea pendiente' :
+                            'Hay ' + this.state.tareas.length + ' tareas pendientes')}
+                </h5>
                 <form onSubmit={this.handleSubmit}>
                     <input type="text" value={this.state.texto} onChange={this.handleChange}/>
                     <input type="submit" value="Agregar"/>
