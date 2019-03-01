@@ -9,19 +9,16 @@ class App extends Component {
             tareas: [],
             idSeleccionado: null
         };
-        this.agregarTarea = this.agregarTarea.bind(this)
-        this.handleSubmit = this.handleSubmit.bind(this)
-        this.handleChange = this.handleChange.bind(this)
-        this.eliminarTarea = this.eliminarTarea.bind(this)
-        this.editarTarea = this.editarTarea.bind(this)
     }
 
+    handleChange  = ({target}) => {
+        this.setState({texto: target.value})
+    }
 
-    handleSubmit(e){
+    handleSubmit = (e) => {
         e.preventDefault()
-        if(this.state.texto !== '')this.agregarTarea(this.state.idSeleccionado)
+        if(this.state.texto !== '') this.agregarTarea(this.state.idSeleccionado)
     }
-
 
 
     agregarTarea(id){
@@ -47,34 +44,36 @@ class App extends Component {
 
     eliminarTarea(id){
         let tareas = this.state.tareas
-        tareas = tareas.filter(t => {
-            return parseInt(t.key) !== id
-        })
-        this.setState({tareas: tareas,idSeleccionado: null,texto: ''})
+        tareas = tareas.filter(t => parseInt(t.key) !== id)
+        this.setState({tareas: tareas, idSeleccionado: null, texto: ''})
     }   
 
+    eliminarTodas = () =>{
+        this.setState({tareas: []})
+    }        
 
-    handleChange({target}){
-        this.setState({texto: target.value})
+
+    getTextoTareasPendientes(){
+        return this.state.tareas.length === 0 ? 'No hay tareas pendientes' :
+            (this.state.tareas.length === 1 ?
+                'Hay una tarea pendiente' :
+                'Hay ' + this.state.tareas.length + ' tareas pendientes')
     }
 
+
+    
 
 
     render() {
         return(
             <div>
                 <h1>TODO-list App</h1>
-                <h5>{
-                    this.state.tareas.length === 0 ?
-                        'No hay tareas pendientes' :
-                        (this.state.tareas.length === 1 ?
-                            'Hay una tarea pendiente' :
-                            'Hay ' + this.state.tareas.length + ' tareas pendientes')}
-                </h5>
+                <h5>{this.getTextoTareasPendientes()}</h5>
                 <form onSubmit={this.handleSubmit}>
                     <input type="text" value={this.state.texto} onChange={this.handleChange}/>
                     <input type="submit" value="Agregar"/>
                 </form>
+                {this.state.tareas.length > 1 && <button onClick={this.eliminarTodas}>Eliminar todas</button>}
                 <div>
                     {this.state.tareas}
                 </div>
@@ -82,9 +81,5 @@ class App extends Component {
         );
     }
 }
-
-App.propTypes = {
-
-};
 
 export default App;
