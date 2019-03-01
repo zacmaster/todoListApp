@@ -50,7 +50,7 @@ class App extends Component {
         tareas = tareas.filter(t => {
             return parseInt(t.key) !== id
         })
-        this.setState({tareas: tareas})
+        this.setState({tareas: tareas,idSeleccionado: null,texto: ''})
     }   
 
 
