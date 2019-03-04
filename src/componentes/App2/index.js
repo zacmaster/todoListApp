@@ -42,32 +42,20 @@ class App2 extends Component {
     // ----methods
 
     addTask = async id => {
-        let tasks = this.state.tasks
-        let title = this.state.title
-        let description = this.state.description
 
-        let taskObj = {title: title, description: description}
-
-        if(!id){
-            id = await this.postTask(taskObj)
-
+        let {tasks, title, description} = this.state
+        const taskObj = {title, description}
+        
+        if(id){
+            await this.updateTask(id,taskObj)
+            tasks = tasks.map(t => t._id === id ? t = {...t, ...taskObj} : t)
         }
         else{
-            tasks = tasks.filter(task => task.key !== id)
-            this.updateTask(id,taskObj)
+            taskObj._id = await this.postTask(taskObj)
+            tasks.push(taskObj)
         }
 
-        tasks.unshift(<Task
-            key={id}
-            id={id}
-            title={title}
-            description={description}
-            editTask={this.editTask}
-            deleteTask={this.deleteTask}
-        />)
-
-
-
+        
         this.setState({
             tasks: tasks,
             title: '',
@@ -75,26 +63,28 @@ class App2 extends Component {
             selectedId: null,
             edicion: false
         })
-        
-
-        
-
     }
+
+
+
+
 
     editTask = (id,title,description) => {
         this.setState({selectedId: id, title: title, description: description, edicion: true})
     }
 
     deleteTask =  async id => {
-        let tasks = this.state.tasks
+        let { tasks } = this.state
         let url = this.url + id
-        tasks = tasks.filter(t => t.key !== id)
-        this.setState({tasks: tasks, selectedId: null, title: '', description: '',edicion: false})
+        console.log('id:',id)
+        tasks = tasks.filter(t => t._id !== id)
         
-        fetch(url,{
+        await fetch(url,{
             method: 'DELETE',
             headers: {'Content-Type': 'application/json'},
         })
+
+        this.setState({tasks: tasks, selectedId: null, title: '', description: '',edicion: false})
     }
 
     deleteAll = async () => {
@@ -110,36 +100,13 @@ class App2 extends Component {
         return this.state.title !== ''
     }
 
-    componentDidMount(){
-        this.getAllTask()
-    }
-
-    getAllTask = async () => {
+    async componentDidMount(){
         const response = await fetch(this.url)
         const tasks = await response.json()
-        this.loadTasksFromApi(tasks)
-
-            
+        this.setState({tasks: tasks})
     }
 
-    loadTasksFromApi = tasksObjects => {
-        let tasks = tasksObjects.map(task => {
-            return (<Task
-                            key={task._id}
-                            id={task._id}
-                            title={task.title}
-                            description={task.description}
-                            editTask={this.editTask}
-                            deleteTask={this.deleteTask}
-            />)
-        })
-        this.setState({
-            tasks: tasks,
-            title: '',
-            description: '',
-            selectedId: null
-        })
-    }
+
 
     postTask = async data => {
         const response = await fetch(this.url,{
@@ -180,8 +147,19 @@ class App2 extends Component {
                         description={this.state.description}
                         submitText={this.state.edicion ? 'Guardar' : 'Agregar'}
                 />
-                <div>
-                    {this.state.tasks}
+                <div style={{display: 'flex',flexDirection: 'column-reverse'}}>
+                    {
+                        this.state.tasks.map(({_id, title, description},index) => (
+                            <Task
+                                key={index}
+                                title={title}
+                                description={description}
+                                editTask={() => this.editTask(_id,title,description)}
+                                deleteTask={() => this.deleteTask(_id)}
+                            />
+                        ))
+
+                    }
                 </div>
             </div>
         );
